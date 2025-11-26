@@ -1,15 +1,17 @@
 version: '3.8'
+
 services:
-  url-shortener:
+  ecommerce-app:
     build: .
-    container_name: url-shortener
+    container_name: ecommerce-app
     ports:
       - "5000:5000"
     volumes:
-      - url_data:/app/data
+      - ecommerce_data:/app/data
     restart: unless-stopped
     environment:
       - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
 
   prometheus:
     image: prom/prometheus:latest
@@ -25,7 +27,7 @@ services:
       - "--web.enable-lifecycle"
     restart: unless-stopped
     depends_on:
-      - url-shortener
+      - ecommerce-app
 
   alertmanager:
     image: prom/alertmanager:latest
@@ -53,6 +55,6 @@ services:
       - prometheus
 
 volumes:
-  url_data:
+  ecommerce_data:
   prometheus_data:
   grafana_data:
