@@ -1,31 +1,64 @@
 # alert.rules.yml
 groups:
-  - name: url_shortener_alerts
+  - name: ecommerce_alerts
     rules:
 
-      - alert: High404Rate
-        expr: rate(urls_not_found_total[5m]) > 0.2
+      # تنبيه: معدل طلبات عالي (High Order Rate)
+      - alert: HighOrderRate
+        expr: rate(orders_placed_total[5m]) > 10
         for: 2m
+        labels:
+          severity: info
+        annotations:
+          summary: "High order rate detected ({{ $value }} orders/sec)"
+          description: "Order rate is unusually high - might indicate success or potential attack."
+
+      # تنبيه: لا توجد طلبات جديدة (No New Orders)
+      - alert: NoNewOrders
+        expr: increase(orders_placed_total[30m]) == 0
+        for: 30m
         labels:
           severity: warning
         annotations:
-          summary: "High 404 rate ({{ $value }})"
-          description: "urls_not_found_total rate > 0.2/s for 5m."
+          summary: "No orders placed in 30 minutes"
+          description: "No new orders have been placed in the last 30 minutes. Check if the service is working properly."
 
+      # تنبيه: استجابة بطيئة (High Latency)
       - alert: High95thLatency
         expr: histogram_quantile(0.95, sum(rate(request_latency_seconds_bucket[5m])) by (le)) > 0.5
         for: 2m
         labels:
           severity: critical
         annotations:
-          summary: "High 95th percentile latency"
-          description: "95th percentile request latency > 0.5s over last 5m."
+          summary: "High 95th percentile latency ({{ $value }}s)"
+          description: "95th percentile request latency is > 0.5s over the last 5 minutes. Performance degradation detected."
 
-      - alert: NoNewUrlsCreated
-        expr: increase(urls_shortened_total[30m]) == 0
-        for: 30m
+      # تنبيه: لا أحد يشاهد المنتجات (Low Product Views)
+      - alert: LowProductViews
+        expr: rate(products_viewed_total[10m]) < 0.01
+        for: 10m
         labels:
           severity: warning
         annotations:
-          summary: "No URLs created in 30m"
-          description: "No new shortened URLs in the last 30 minutes."
+          summary: "Very low product view rate"
+          description: "Product view rate is unusually low. Potential traffic issue."
+
+      # تنبيه: معدل إضافة للسلة منخفض (Low Cart Addition Rate)
+      - alert: LowCartAdditionRate
+        expr: rate(cart_additions_total[15m]) < 0.01
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low cart addition rate"
+          description: "Users are viewing products but not adding them to cart. Check UX or pricing."
+
+      # تنبيه: التطبيق معطل (App Down)
+      - alert: EcommerceAppDown
+        expr: up{job="ecommerce-app"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "E-commerce application is down"
+          description: "The e-commerce app is not responding to Prometheus scrapes."
