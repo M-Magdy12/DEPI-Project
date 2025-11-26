@@ -1,9 +1,18 @@
-# URL Shortener - DevOps Project (Week 1)
+# URL Shortener + Monitoring (Prometheus + Grafana)
 
-Run:
-  docker compose up --build
+## المتطلبات
+- Docker
+- Docker Compose
 
-API:
-  POST /shorten   (JSON body: { "url": "https://example.com" })
-  GET  /<short_code>
-  GET  /metrics   (Prometheus format)
+## ملفات مهمة
+- prometheus.yml
+- alert.rules.yml
+- alertmanager.yml
+- grafana/provisioning/... (datasource + dashboard)
+- docker-compose.yml
+- app.py (تأكد أنه يحتوي على /metrics ويمتدَّ بالكود الموجود)
+
+## تشغيل الستاك
+1. مكان المشروع، شغل:
+   ```bash
+   docker-compose up --build -d
