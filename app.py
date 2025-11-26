@@ -51,12 +51,18 @@ def gen_code(n=6):
 def home():
     return render_template("ecommerce.html")
 
-# URL shortener API (اختياري لو حابب تحافظ عليه)
+# صفحة الواجهة الجديدة
+@app.route("/frontend")
+def frontend_page():
+    return render_template("homepage.html")
+
+# API لتقصير الروابط
 @app.route("/shorten", methods=["POST"])
 def shorten():
     start = time.time()
     data = request.get_json() or {}
     long_url = data.get("url")
+
     if not long_url:
         return jsonify({"error": "missing url"}), 400
 

@@ -3,105 +3,679 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My E-commerce Store</title>
+    <title>TechStore - Premium Electronics</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/owl.theme.default.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/aos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --border: #e5e7eb;
+        }
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
-        header {
-            background-color: #007bff;
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        /* Navbar */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        
+        .nav-link {
+            color: var(--dark);
+            font-weight: 500;
+            margin: 0 15px;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary);
+        }
+        
+        .cart-icon {
+            position: relative;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .cart-icon:hover {
+            color: var(--primary);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary);
             color: white;
-            padding: 20px;
-            text-align: center;
-        }
-        h1 { margin: 0; }
-
-        .products {
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
             display: flex;
-            flex-wrap: wrap;
+            align-items: center;
             justify-content: center;
-            padding: 20px;
+            font-weight: 600;
         }
-        .product {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin: 10px;
-            width: 220px;
+        
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 100px 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            top: -250px;
+            right: -150px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+        
+        .btn-hero {
+            background: white;
+            color: var(--primary);
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            border: none;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .btn-hero:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        /* Products Section */
+        .products-section {
+            padding: 80px 0;
+            background: var(--light);
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
             text-align: center;
-            padding: 15px;
-            transition: transform 0.2s;
+            margin-bottom: 50px;
+            color: var(--dark);
         }
-        .product:hover { transform: translateY(-5px); }
-        .product img {
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            margin-bottom: 30px;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .product-img {
             width: 100%;
-            border-radius: 5px;
+            height: 250px;
+            object-fit: cover;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #ccc;
         }
-        .product h3 {
-            color: #333;
+        
+        .product-body {
+            padding: 25px;
         }
-        .product p {
-            color: #555;
-            font-size: 16px;
-            margin: 10px 0;
+        
+        .product-category {
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
-        .product button {
-            background-color: #28a745;
+        
+        .product-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        
+        .product-description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .btn-add-cart {
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
-        .product button:hover { background-color: #218838; }
-
-        footer {
-            background-color: #222;
+        
+        .btn-add-cart:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        
+        /* Categories */
+        .categories-section {
+            padding: 60px 0;
+            background: white;
+        }
+        
+        .category-card {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
+            padding: 40px 30px;
+            border-radius: 15px;
             text-align: center;
-            padding: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        .category-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 80px;
+        }
+        
+        .footer-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .footer-link {
+            color: #9ca3af;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+        
+        .footer-link:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
             margin-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #9ca3af;
+        }
+        
+        /* Cart Modal */
+        .modal-header {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 15px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #ccc;
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .cart-item-price {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: right;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome to My E-commerce Store</h1>
-    </header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">🛒 TechStore</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#products">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#categories">Categories</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link cart-icon" data-bs-toggle="modal" data-bs-target="#cartModal">
+                            🛒
+                            <span class="cart-badge" id="cartCount">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <div class="products">
-        <div class="product">
-            <img src="https://via.placeholder.com/220x150" alt="Product 1">
-            <h3>Product 1</h3>
-            <p>$10</p>
-            <button>Add to Cart</button>
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6" data-aos="fade-right">
+                    <h1 class="hero-title">Premium Electronics at Your Fingertips</h1>
+                    <p class="hero-subtitle">Discover the latest gadgets and tech innovations with unbeatable prices</p>
+                    <button class="btn btn-hero" onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})">
+                        Shop Now 🚀
+                    </button>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div style="font-size: 15rem; text-align: center;">📱</div>
+                </div>
+            </div>
         </div>
-        <div class="product">
-            <img src="https://via.placeholder.com/220x150" alt="Product 2">
-            <h3>Product 2</h3>
-            <p>$15</p>
-            <button>Add to Cart</button>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories-section" id="categories">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Shop by Category</h2>
+            <div class="row">
+                <div class="col-md-3 col-sm-6 mb-4" data-aos="fade-up">
+                    <div class="category-card">
+                        <div class="category-icon">📱</div>
+                        <div class="category-name">Smartphones</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="category-card">
+                        <div class="category-icon">💻</div>
+                        <div class="category-name">Laptops</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="category-card">
+                        <div class="category-icon">🎧</div>
+                        <div class="category-name">Audio</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="category-card">
+                        <div class="category-icon">⌚</div>
+                        <div class="category-name">Wearables</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="product">
-            <img src="https://via.placeholder.com/220x150" alt="Product 3">
-            <h3>Product 3</h3>
-            <p>$20</p>
-            <button>Add to Cart</button>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="products">
+        <div class="container">
+            <h2 class="section-title" data-aos="fade-up">Featured Products</h2>
+            <div class="row" id="productsContainer">
+                <!-- Products will be loaded here by JavaScript -->
+            </div>
         </div>
-        <div class="product">
-            <img src="https://via.placeholder.com/220x150" alt="Product 4">
-            <h3>Product 4</h3>
-            <p>$25</p>
-            <button>Add to Cart</button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="footer-title">TechStore</h5>
+                    <p style="color: #9ca3af;">Your trusted destination for premium electronics and gadgets.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="footer-title">Quick Links</h5>
+                    <a href="#" class="footer-link">About Us</a>
+                    <a href="#" class="footer-link">Contact</a>
+                    <a href="#" class="footer-link">Shipping Info</a>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="footer-title">Customer Service</h5>
+                    <a href="#" class="footer-link">Track Order</a>
+                    <a href="#" class="footer-link">Returns</a>
+                    <a href="#" class="footer-link">FAQ</a>
+                </div>
+            </div>
+            <div class="copyright">
+                © 2024 TechStore. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">🛒 Shopping Cart</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartItems">
+                        <p class="text-center text-muted">Your cart is empty</p>
+                    </div>
+                    <div id="cartTotal" class="cart-total d-none">
+                        Total: $<span id="totalAmount">0</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Shopping</button>
+                    <button type="button" class="btn btn-primary" id="checkoutBtn" disabled>Checkout</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <footer>
-        &copy; 2025 My E-commerce Store. All rights reserved.
-    </footer>
+    <!-- JS -->
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/aos.js') }}"></script>
+    
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+        
+        // Products Data
+        const products = [
+            {
+                id: 1,
+                name: "iPhone 15 Pro",
+                category: "Smartphones",
+                price: 999,
+                description: "Latest flagship with A17 Pro chip and titanium design",
+                icon: "📱"
+            },
+            {
+                id: 2,
+                name: "MacBook Pro 16\"",
+                category: "Laptops",
+                price: 2499,
+                description: "Powerful M3 Max chip for professionals",
+                icon: "💻"
+            },
+            {
+                id: 3,
+                name: "AirPods Pro",
+                category: "Audio",
+                price: 249,
+                description: "Active noise cancellation with spatial audio",
+                icon: "🎧"
+            },
+            {
+                id: 4,
+                name: "Apple Watch Ultra",
+                category: "Wearables",
+                price: 799,
+                description: "Rugged titanium case with advanced health features",
+                icon: "⌚"
+            },
+            {
+                id: 5,
+                name: "iPad Pro 12.9\"",
+                category: "Tablets",
+                price: 1099,
+                description: "M2 chip with Liquid Retina XDR display",
+                icon: "📲"
+            },
+            {
+                id: 6,
+                name: "Sony WH-1000XM5",
+                category: "Audio",
+                price: 399,
+                description: "Industry-leading noise cancellation",
+                icon: "🎵"
+            },
+            {
+                id: 7,
+                name: "Samsung Galaxy S24",
+                category: "Smartphones",
+                price: 899,
+                description: "AI-powered photography and performance",
+                icon: "📱"
+            },
+            {
+                id: 8,
+                name: "Dell XPS 15",
+                category: "Laptops",
+                price: 1799,
+                description: "InfinityEdge display with powerful specs",
+                icon: "💻"
+            }
+        ];
+        
+        // Cart Management
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        function updateCartUI() {
+            $('#cartCount').text(cart.length);
+            
+            if (cart.length === 0) {
+                $('#cartItems').html('<p class="text-center text-muted">Your cart is empty</p>');
+                $('#cartTotal').addClass('d-none');
+                $('#checkoutBtn').prop('disabled', true);
+                return;
+            }
+            
+            let total = 0;
+            let html = '';
+            
+            cart.forEach((item, index) => {
+                total += item.price;
+                html += `
+                    <div class="cart-item">
+                        <div class="cart-item-img">${item.icon}</div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-item-price">$${item.price}</div>
+                        </div>
+                        <button class="btn-remove" onclick="removeFromCart(${index})">Remove</button>
+                    </div>
+                `;
+            });
+            
+            $('#cartItems').html(html);
+            $('#totalAmount').text(total);
+            $('#cartTotal').removeClass('d-none');
+            $('#checkoutBtn').prop('disabled', false);
+        }
+        
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            cart.push(product);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartUI();
+            
+            // Show toast notification
+            alert('✅ Added to cart: ' + product.name);
+        }
+        
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+        
+        // Render Products
+        function renderProducts() {
+            let html = '';
+            products.forEach((product, index) => {
+                const delay = (index % 4) * 100;
+                html += `
+                    <div class="col-lg-3 col-md-4 col-sm-6" data-aos="fade-up" data-aos-delay="${delay}">
+                        <div class="product-card">
+                            <div class="product-img">${product.icon}</div>
+                            <div class="product-body">
+                                <div class="product-category">${product.category}</div>
+                                <h5 class="product-title">${product.name}</h5>
+                                <p class="product-description">${product.description}</p>
+                                <div class="product-footer">
+                                    <div class="product-price">$${product.price}</div>
+                                    <button class="btn-add-cart" onclick="addToCart(${product.id})">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            $('#productsContainer').html(html);
+        }
+        
+        // Checkout
+        $('#checkoutBtn').on('click', function() {
+            alert('🎉 Checkout feature coming soon! Total: $' + $('#totalAmount').text());
+        });
+        
+        // Initialize
+        $(document).ready(function() {
+            renderProducts();
+            updateCartUI();
+        });
+    </script>
 </body>
 </html>
