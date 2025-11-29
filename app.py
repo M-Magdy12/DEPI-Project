@@ -1,24 +1,25 @@
-#E-commerce backend.py
+# E-commerce backend.py
 from flask import Flask, request, jsonify, render_template
 import os
 import sqlite3
 import time
 from datetime import datetime
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 
 app = Flask(__name__)
 
 DB_PATH = "/app/data/ecommerce.db"
+
 
 # ==========================
 # DATABASE INITIALIZATION
 # ==========================
 def init_db():
     os.makedirs("/app/data", exist_ok=True)
-    
+
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    
+
     # Products table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS products (
@@ -32,7 +33,7 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
+
     # Orders table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS orders (
@@ -45,7 +46,7 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
+
     # Order items table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS order_items (
@@ -59,7 +60,7 @@ def init_db():
             FOREIGN KEY (product_id) REFERENCES products(id)
         )
     """)
-    
+
     # Check if products exist, if not add sample data
     cur.execute("SELECT COUNT(*) FROM products")
     if cur.fetchone()[0] == 0:
@@ -77,9 +78,10 @@ def init_db():
             "INSERT INTO products (name, category, price, description, icon) VALUES (?, ?, ?, ?, ?)",
             sample_products
         )
-    
+
     conn.commit()
     conn.close()
+
 
 init_db()
 
@@ -90,6 +92,54 @@ PRODUCTS_VIEWED = Counter('products_viewed_total', 'Total product views')
 ORDERS_PLACED = Counter('orders_placed_total', 'Total orders placed')
 CART_ADDITIONS = Counter('cart_additions_total', 'Total items added to cart')
 REQUEST_LATENCY = Histogram('request_latency_seconds', 'Request latency in seconds')
+TOTAL_REQUESTS = Counter('http_requests_total', 'Total HTTP requests', ['method', 'endpoint', 'status'])
+TOTAL_PRODUCTS = Gauge('total_products_count', 'Total number of products in inventory')
+TOTAL_ORDERS = Gauge('total_orders_count', 'Total number of orders in system')
+
+
+# ==========================
+# MIDDLEWARE - Track all requests
+# ==========================
+@app.before_request
+def before_request():
+    request.start_time = time.time()
+
+
+@app.after_request
+def after_request(response):
+    request_latency = time.time() - request.start_time
+    REQUEST_LATENCY.observe(request_latency)
+
+    # Track total requests by method, endpoint, and status
+    TOTAL_REQUESTS.labels(
+        method=request.method,
+        endpoint=request.endpoint or 'unknown',
+        status=response.status_code
+    ).inc()
+
+    return response
+
+
+# ==========================
+# HELPER FUNCTION - Update gauges
+# ==========================
+def update_gauges():
+    """Update gauge metrics with current database counts"""
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    # Count total products
+    cur.execute("SELECT COUNT(*) FROM products")
+    product_count = cur.fetchone()[0]
+    TOTAL_PRODUCTS.set(product_count)
+
+    # Count total orders
+    cur.execute("SELECT COUNT(*) FROM orders")
+    order_count = cur.fetchone()[0]
+    TOTAL_ORDERS.set(order_count)
+
+    conn.close()
+
 
 # ==========================
 # ROUTES
@@ -100,67 +150,68 @@ REQUEST_LATENCY = Histogram('request_latency_seconds', 'Request latency in secon
 def home():
     return render_template("ecommerce.html")
 
+
 # Get all products
 @app.route("/api/products", methods=["GET"])
 def get_products():
     start = time.time()
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    
+
     category = request.args.get('category')
-    
+
     if category:
         cur.execute("SELECT * FROM products WHERE category = ?", (category,))
     else:
         cur.execute("SELECT * FROM products")
-    
+
     products = [dict(row) for row in cur.fetchall()]
     conn.close()
-    
+
     PRODUCTS_VIEWED.inc()
-    REQUEST_LATENCY.observe(time.time() - start)
-    
+
     return jsonify(products)
+
 
 # Get single product
 @app.route("/api/products/<int:product_id>", methods=["GET"])
 def get_product(product_id):
     start = time.time()
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    
+
     cur.execute("SELECT * FROM products WHERE id = ?", (product_id,))
     product = cur.fetchone()
     conn.close()
-    
+
     if not product:
         return jsonify({"error": "Product not found"}), 404
-    
-    REQUEST_LATENCY.observe(time.time() - start)
+
     return jsonify(dict(product))
+
 
 # Place order
 @app.route("/api/orders", methods=["POST"])
 def place_order():
     start = time.time()
     data = request.get_json() or {}
-    
+
     # Validate required fields
     customer_name = data.get("customer_name")
     customer_email = data.get("customer_email")
     customer_phone = data.get("customer_phone", "")
     items = data.get("items", [])
-    
+
     if not customer_name or not customer_email or not items:
         return jsonify({"error": "Missing required fields"}), 400
-    
+
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    
+
     # Calculate total
     total_amount = 0
     for item in items:
@@ -168,14 +219,14 @@ def place_order():
         product = cur.fetchone()
         if product:
             total_amount += product[0] * item.get('quantity', 1)
-    
+
     # Create order
     cur.execute(
         "INSERT INTO orders (customer_name, customer_email, customer_phone, total_amount) VALUES (?, ?, ?, ?)",
         (customer_name, customer_email, customer_phone, total_amount)
     )
     order_id = cur.lastrowid
-    
+
     # Add order items
     for item in items:
         cur.execute("SELECT name, price FROM products WHERE id = ?", (item['product_id'],))
@@ -185,13 +236,13 @@ def place_order():
                 "INSERT INTO order_items (order_id, product_id, product_name, price, quantity) VALUES (?, ?, ?, ?, ?)",
                 (order_id, item['product_id'], product[0], product[1], item.get('quantity', 1))
             )
-    
+
     conn.commit()
     conn.close()
-    
+
     ORDERS_PLACED.inc()
-    REQUEST_LATENCY.observe(time.time() - start)
-    
+    update_gauges()  # Update total orders count
+
     return jsonify({
         "success": True,
         "order_id": order_id,
@@ -199,50 +250,51 @@ def place_order():
         "message": "Order placed successfully!"
     }), 201
 
+
 # Get order by ID
 @app.route("/api/orders/<int:order_id>", methods=["GET"])
 def get_order(order_id):
     start = time.time()
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    
+
     # Get order
     cur.execute("SELECT * FROM orders WHERE id = ?", (order_id,))
     order = cur.fetchone()
-    
+
     if not order:
         conn.close()
         return jsonify({"error": "Order not found"}), 404
-    
+
     # Get order items
     cur.execute("SELECT * FROM order_items WHERE order_id = ?", (order_id,))
     items = [dict(row) for row in cur.fetchall()]
-    
+
     conn.close()
-    
+
     order_data = dict(order)
     order_data['items'] = items
-    
-    REQUEST_LATENCY.observe(time.time() - start)
+
     return jsonify(order_data)
+
 
 # Get all orders (admin)
 @app.route("/api/orders", methods=["GET"])
 def get_all_orders():
     start = time.time()
-    
+
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    
+
     cur.execute("SELECT * FROM orders ORDER BY created_at DESC")
     orders = [dict(row) for row in cur.fetchall()]
     conn.close()
-    
-    REQUEST_LATENCY.observe(time.time() - start)
+
     return jsonify(orders)
+
 
 # Add to cart tracking (optional - for analytics)
 @app.route("/api/cart/add", methods=["POST"])
@@ -250,10 +302,14 @@ def track_cart_addition():
     CART_ADDITIONS.inc()
     return jsonify({"success": True})
 
+
 # Prometheus metrics
 @app.route("/metrics")
 def metrics():
+    # Update gauges before exposing metrics
+    update_gauges()
     return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
+
 
 # Health check
 @app.route("/health")
@@ -262,6 +318,7 @@ def health():
         "status": "healthy",
         "timestamp": datetime.now().isoformat()
     })
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

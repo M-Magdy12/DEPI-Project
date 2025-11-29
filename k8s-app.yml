@@ -1,0 +1,160 @@
+# ==========================
+# NAMESPACE
+# ==========================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ecommerce
+
+---
+# ==========================
+# PERSISTENT VOLUME CLAIM
+# ==========================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ecommerce-data-pvc
+  namespace: ecommerce
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+# ==========================
+# CONFIGMAP
+# ==========================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ecommerce-config
+  namespace: ecommerce
+data:
+  DB_PATH: "/app/data/ecommerce.db"
+  FLASK_ENV: "production"
+
+---
+# ==========================
+# DEPLOYMENT
+# ==========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-app
+  namespace: ecommerce
+  labels:
+    app: ecommerce
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce
+  template:
+    metadata:
+      labels:
+        app: ecommerce
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: ecommerce
+        image: prod 
+        imagePullPolicy: Never  
+        ports:
+        - containerPort: 5000
+          name: http
+          protocol: TCP
+        env:
+        - name: DB_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: ecommerce-config
+              key: DB_PATH
+        - name: FLASK_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: ecommerce-config
+              key: FLASK_ENV
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: ecommerce-data-pvc
+
+---
+# ==========================
+# SERVICE (ClusterIP)
+# ==========================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-service
+  namespace: ecommerce
+  labels:
+    app: ecommerce
+spec:
+  type: ClusterIP
+  selector:
+    app: ecommerce
+  ports:
+  - port: 80
+    targetPort: 5000
+    protocol: TCP
+    name: http
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+    name: metrics
+
+---
+# ==========================
+# SERVICE (NodePort) - For Minikube
+# ==========================
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-nodeport
+  namespace: ecommerce
+  labels:
+    app: ecommerce
+spec:
+  type: NodePort
+  selector:
+    app: ecommerce
+  ports:
+  - port: 80
+    targetPort: 5000
+    nodePort: 30080
+    protocol: TCP
+    name: http
+
