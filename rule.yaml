@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: depi-rule
+  namespace: monitoring
+  labels:
+    app: kube-prometheus-stack
+    release: prometheus
+spec:
+  groups:
+  - name: pod-cpu-usage
+    rules:
+    - alert: HighCpuUsage
+      expr: sum(rate(container_cpu_usage_seconds_total{image!="",container_name!="POD"}[5m])) by (pod) > 0.4
+      for: 6m
+      labels:
+        severity: critical
+        namespace: monitoring
+      annotations:
+        summary: "High CPU usage detected for pod {{ $labels.pod }}"
+        description: "CPU usage for pod {{ $labels.pod }} is higher than 50% for more than 1 minute."
