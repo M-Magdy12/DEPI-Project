@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: stress-pod
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  containers:
+  - name: stress
+    image: busybox
+    resources:
+      limits:
+        cpu: "1"
+    command: ["sh", "-c", "while true; do : ; done"]
