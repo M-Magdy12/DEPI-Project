@@ -47,3 +47,6 @@ Usability & User Experience Focus
     creation, browsing)
     Responsive design for mobile and desktop
     Simple layout designed for non-technical users
+-----------------------------------------------------------------------------------------------------------------------------
+Enhancement we are supposed to do
+using Terraform to manage infrastructure as code (IaC), allowing us to automate the creation and management of cloud resources in a repeatable and consistent we will push it separately in commit called "Enhancement"   

@@ -1,8 +1,8 @@
-#!/bin/bash
+
 
 echo "🔧 Fixing E-commerce App..."
 
-# 1. Fix requirements.txt
+
 cat > requirements.txt << 'EOF'
 Flask==2.3.0
 prometheus-flask-exporter==0.22.4
@@ -11,7 +11,7 @@ werkzeug==2.3.0
 EOF
 echo "✅ Fixed requirements.txt"
 
-# 2. Fix Dockerfile
+
 cat > Dockerfile << 'EOF'
 FROM python:3.9-slim
 
@@ -34,24 +34,24 @@ CMD ["python", "app.py"]
 EOF
 echo "✅ Fixed Dockerfile"
 
-# 3. Build
+
 echo "🏗️  Building Docker image..."
 docker build -t marwanhassan22/ecommerce-app:v2 .
 
-# 4. Push
+
 echo "📤 Pushing to Docker Hub..."
 docker push marwanhassan22/ecommerce-app:v2
 
-# 5. Update deployment file
+
 sed -i 's/:v1/:v2/g' ecommerce-deployment.yaml
 echo "✅ Updated deployment file"
 
-# 6. Redeploy
+
 echo "🚀 Redeploying..."
 kubectl delete deployment ecommerce-app
 sleep 3
 kubectl apply -f ecommerce-deployment.yaml
 
-# 7. Watch
+
 echo "👀 Watching pods..."
 kubectl get pods -l app=ecommerce -w

@@ -20,3 +20,4 @@ spec:
         name: slack-secret
       channel: '#all-manga'
       sendResolved: true
+

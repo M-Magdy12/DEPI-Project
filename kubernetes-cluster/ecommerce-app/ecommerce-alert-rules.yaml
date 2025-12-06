@@ -10,7 +10,7 @@ spec:
   - name: ecommerce
     interval: 30s
     rules:
-    # Application availability
+  
     - alert: EcommerceAppDown
       expr: up{job="ecommerce-service"} == 0
       for: 1m
@@ -21,7 +21,7 @@ spec:
         summary: "E-commerce application is down"
         description: "E-commerce app {{ $labels.instance }} has been down for more than 1 minute"
     
-    # High error rate
+  
     - alert: HighErrorRate
       expr: rate(flask_http_request_total{status=~"5.."}[5m]) > 0.05
       for: 2m
@@ -32,7 +32,7 @@ spec:
         summary: "High error rate detected"
         description: "Error rate is {{ $value }} errors per second on {{ $labels.instance }}"
     
-    # High response time
+   
     - alert: HighResponseTime
       expr: flask_http_request_duration_seconds_sum / flask_http_request_duration_seconds_count > 1
       for: 3m
@@ -43,7 +43,7 @@ spec:
         summary: "High response time detected"
         description: "Average response time is {{ $value }}s on {{ $labels.instance }}"
     
-    # High memory usage
+    
     - alert: HighMemoryUsage
       expr: container_memory_usage_bytes{pod=~"ecommerce-app-.*"} / container_spec_memory_limit_bytes{pod=~"ecommerce-app-.*"} > 0.85
       for: 5m
@@ -54,7 +54,7 @@ spec:
         summary: "High memory usage"
         description: "Memory usage is {{ $value | humanizePercentage }} on pod {{ $labels.pod }}"
     
-    # High CPU usage
+   
     - alert: HighCPUUsage
       expr: rate(container_cpu_usage_seconds_total{pod=~"ecommerce-app-.*"}[5m]) > 0.8
       for: 5m
@@ -65,7 +65,7 @@ spec:
         summary: "High CPU usage"
         description: "CPU usage is {{ $value | humanizePercentage }} on pod {{ $labels.pod }}"
     
-    # Pod restart
+    
     - alert: PodRestarting
       expr: rate(kube_pod_container_status_restarts_total{pod=~"ecommerce-app-.*"}[15m]) > 0
       for: 5m
@@ -76,7 +76,7 @@ spec:
         summary: "Pod is restarting frequently"
         description: "Pod {{ $labels.pod }} has restarted {{ $value }} times in the last 15 minutes"
     
-    # Low request rate (potential issue)
+    
     - alert: LowRequestRate
       expr: rate(flask_http_request_total[5m]) < 0.01
       for: 10m

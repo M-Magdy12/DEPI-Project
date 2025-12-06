@@ -19,3 +19,4 @@ spec:
       annotations:
         summary: "High CPU usage detected for pod {{ $labels.pod }}"
         description: "CPU usage for pod {{ $labels.pod }} is higher than 50% for more than 1 minute."
+

@@ -13,3 +13,4 @@ spec:
       limits:
         cpu: "1"
     command: ["sh", "-c", "while true; do : ; done"]
+

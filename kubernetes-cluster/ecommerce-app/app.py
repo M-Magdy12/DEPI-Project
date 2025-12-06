@@ -8,11 +8,11 @@ import os
 
 app = Flask(__name__, static_folder='.')
 
-# Prometheus metrics
+
 metrics = PrometheusMetrics(app, defaults_prefix="ecommerce_app")
 metrics.info('app_info', 'E-commerce Application', version='1.0.0')
 
-# Custom metrics
+
 order_counter = Counter(
     'ecommerce_app_orders_total', 
     'Total number of successfully created orders'
@@ -34,17 +34,17 @@ low_stock_products = Counter(
     'Products with low stock (< 10 items)'
 )
 
-# Logging setup
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Safe DB connection
+
 def get_db():
     conn = sqlite3.connect('ecommerce.db', check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 
-# DB Initialization
+
 def init_db():
     conn = sqlite3.connect('ecommerce.db')
     c = conn.cursor()
@@ -63,7 +63,7 @@ def init_db():
                 order_date TEXT,
                 FOREIGN KEY(product_id) REFERENCES products(id))''')
 
-    # Insert sample data
+    
     c.execute("SELECT COUNT(*) FROM products")
     if c.fetchone()[0] == 0:
         sample = [
@@ -81,12 +81,12 @@ def init_db():
 
 init_db()
 
-# Serve HTML
+
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
 
-# API Routes
+
 @app.route('/health')
 def health():
     return jsonify({"status": "healthy", "timestamp": datetime.now().isoformat()}), 200

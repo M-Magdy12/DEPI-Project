@@ -9,7 +9,7 @@ data:
     <!-- Copy the full HTML content from index.html artifact here -->
     <!-- Or mount it as a volume in the deployment -->
 ---
-# Update deployment to include the HTML
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
