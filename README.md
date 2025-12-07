@@ -50,3 +50,38 @@ Usability & User Experience Focus
 -----------------------------------------------------------------------------------------------------------------------------
 Enhancement we are supposed to do
 using Terraform to manage infrastructure as code (IaC), allowing us to automate the creation and management of cloud resources in a repeatable and consistent we will push it separately in commit called " Enhancement "   
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+the e-commerce webapp :
+http://13.53.38.111:30080/
+
+or from the another node
+
+http://51.20.119.158:30080/
+
+
+Grafana webapp monitoring :
+http://13.53.38.111:32509/d/flask-ecommerce-dashboard/flask-e-commerce-monitoring?orgId=1&from=2025-12-07T09:36:29.572Z&to=2025-12-07T16:41:22.920Z&timezone=browser&refresh=10s
+
+or from the another node
+
+http://51.20.119.158:32509/d/flask-ecommerce-dashboard/flask-e-commerce-monitoring?orgId=1&from=2025-12-07T09:36:29.572Z&to=2025-12-07T16:41:22.920Z&timezone=browser&refresh=10s
+
+
+Prometheus :
+http://13.53.38.111:30342/query
+
+or from the another node
+
+http://51.20.119.158:30342/query
+
+
+
+alertmanger :
+http://13.53.38.111:30258/#/alerts
+
+or from the another node
+
+http://51.20.119.158:30258/#/alerts
+
