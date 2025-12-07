@@ -5,7 +5,7 @@ pipeline {
         stage('build') {
             steps {
                 sh """
-                    docker build -t ecommercedepi .
+                    docker build -t ecommercedepi -f Dockerfile .
                 """
             }
         }
