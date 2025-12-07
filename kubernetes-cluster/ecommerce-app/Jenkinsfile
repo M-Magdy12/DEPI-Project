@@ -15,8 +15,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'marwantoken', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh """
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker tag ecommerceDEPI $DOCKER_USER/ecommerceDEPI:latest
-                        docker push $DOCKER_USER/ecommerceDEPI:latest
+                        docker tag ecommercedepi $DOCKER_USER/ecommercedepi:latest
+                        docker push $DOCKER_USER/ecommercedepi:latest
                     """
                 }
             }
