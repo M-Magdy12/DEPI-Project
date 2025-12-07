@@ -1,7 +1,7 @@
 FROM python:3.9-slim as builder
 WORKDIR /app
 
-COPY requirements.txt .
+COPY kubernetes-cluster/ecommerce-app/requirements.txt .
 
 RUN pip install --no-cache-dir --user -r requirements.txt
 
@@ -14,9 +14,9 @@ RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /root/.local /root/.local
 
-COPY app.py .
+COPY kubernetes-cluster/ecommerce-app/app.py .
 
-COPY index.html .
+COPY kubernetes-cluster/ecommerce-app/index.html .
 
 ENV PATH=/root/.local/bin:$PATH
 
