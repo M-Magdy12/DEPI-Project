@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+   
+    stages {
+        stage('build') {
+            steps {
+                sh """
+                    docker build -t ecommerceDEPI .
+                """
+            }
+        }
+
+        stage('push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'marwantoken', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker tag ecommerceDEPI $DOCKER_USER/ecommerceDEPI:latest
+                        docker push $DOCKER_USER/ecommerceDEPI:latest
+                    """
+                }
+            }
+        }
+
+    }
+}
