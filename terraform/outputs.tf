@@ -12,3 +12,7 @@ value = data.aws_vpc.default.id
 output "used_subnet" {
 value = data.aws_subnet_ids.default.ids[0]
 }
+
+output "alb_dns_name" {
+  value = aws_lb.app_lb.dns_name
+}
